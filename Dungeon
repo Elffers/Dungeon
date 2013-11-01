@@ -1,0 +1,122 @@
+class Dungeon
+	attr_accessor :player
+
+	def initialize(player_name)
+		@player = Player.new(player_name)
+		@rooms = []
+	end
+
+	# Method to add new rooms
+	def add_room(reference, name, description, connections)
+		@rooms << Room.new(reference, name, description, connections)
+	end
+
+ 	#Initialize player location
+ 	def start(location)
+ 		@player.location = location
+ 		show_current_description
+ 	end
+
+  def show_current_description
+  	#Possible solution: not ever have location = nil 
+  	#                   resassign player location									 
+  	# if @player.location == nil
+  	# 	@player.location = 
+  	# end
+	  puts find_room_in_dungeon(@player.location).full_description
+  end
+
+  def find_room_in_dungeon(reference)
+  	@rooms.detect { |room| room.reference == reference}
+  end
+
+  def find_room_in_direction(direction)
+  	# direction = :west
+  	#player.location = :smallcave
+  	room = find_room_in_dungeon(@player.location).connections[direction]
+  	if room == nil
+  		@player.location
+  	else
+  		room
+  	end
+  end
+
+  def go(direction)
+  	puts "You go " + direction.to_s
+  	@player.location = find_room_in_direction(direction)
+  	show_current_description
+  end
+
+  # def trapped_test
+  # 	location = @player.location.to_s
+  # 	return location = "deathroom"
+  # end
+
+	#Player = Struct.new(:name, :location)
+	class Player
+		attr_accessor :name, :location
+
+		def initialize(player_name)
+			@name = player_name
+		end
+	end
+
+
+	#Room = Struct.new(:reference, :name, :description, :connections)
+
+	class Room
+		attr_accessor :reference, :name, :description, :connections
+
+		def full_description
+			@name + "\n\nYou are in " + @description
+		end
+
+		def initialize(reference, name, description, connections)
+		  @reference = reference
+		  @name = name
+		  @description = description
+		  @connections = connections
+		end 
+	end
+
+end
+
+#Create the main dungeon object
+my_dungeon = Dungeon.new("Esmerelda Fitzgibbon")
+
+#Add rooms to dungeon
+my_dungeon.add_room(:largecave, "Large Cave", "a large cavernous cave", {:west => :smallcave, :north => :hallway})
+my_dungeon.add_room(:smallcave, "Small Cave", "a small, claustrophobic cave", {:east => :largecave, :north => :chamber})
+
+my_dungeon.add_room(:chamber, "Chamber", "a granite chamber with filtered light shining through cracks in the ceiling", {:east => :hallway, :south => :smallcave, :north => :deathroom})
+
+my_dungeon.add_room(:hallway, "Hallway", "a damp hallway with a dim light from the west", {:west => :chamber, :south => :largecave})
+my_dungeon.add_room(:deathroom, "Death room", "You have been killed by all the things", {:south => :chamber})
+
+#Start the dungeon by placing the player in the large cave
+puts "Welcome to Zork, the bane of my childhood existance. Identify yourself!"
+
+name = gets.chomp
+
+puts "Welcome #{name}."
+
+my_dungeon.start(:smallcave)
+
+# my_dungeon.show_current_description
+
+#Gets input from player for direction
+
+# trapped = false
+# while trapped == false
+# 	puts "Where do you want to go?"
+# 	direction = gets.chomp.to_sym
+# 	my_dungeon.go(direction)
+# 	trapped = my_dungeon.trapped_test
+# end
+
+while true
+	puts "Where do you want to go?"
+ 	direction = gets.chomp.to_sym
+ 	my_dungeon.go(direction)
+end
+
